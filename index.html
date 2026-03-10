@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>仮名 — Kana App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const kanaData = [
+  {h:'あ',k:'ア',r:'a',   row:'a',  t:'base'},
+  {h:'い',k:'イ',r:'i',   row:'a',  t:'base'},
+  {h:'う',k:'ウ',r:'u',   row:'a',  t:'base'},
+  {h:'え',k:'エ',r:'e',   row:'a',  t:'base'},
+  {h:'お',k:'オ',r:'o',   row:'a',  t:'base'},
+  {h:'か',k:'カ',r:'ka',  row:'ka', t:'base'},
+  {h:'き',k:'キ',r:'ki',  row:'ka', t:'base'},
+  {h:'く',k:'ク',r:'ku',  row:'ka', t:'base'},
+  {h:'け',k:'ケ',r:'ke',  row:'ka', t:'base'},
+  {h:'こ',k:'コ',r:'ko',  row:'ka', t:'base'},
+  {h:'さ',k:'サ',r:'sa',  row:'sa', t:'base'},
+  {h:'し',k:'シ',r:'shi', row:'sa', t:'base', alt:['si']},
+  {h:'す',k:'ス',r:'su',  row:'sa', t:'base'},
+  {h:'せ',k:'セ',r:'se',  row:'sa', t:'base'},
+  {h:'そ',k:'ソ',r:'so',  row:'sa', t:'base'},
+  {h:'た',k:'タ',r:'ta',  row:'ta', t:'base'},
+  {h:'ち',k:'チ',r:'chi', row:'ta', t:'base', alt:['ti']},
+  {h:'つ',k:'ツ',r:'tsu', row:'ta', t:'base', alt:['tu']},
+  {h:'て',k:'テ',r:'te',  row:'ta', t:'base'},
+  {h:'と',k:'ト',r:'to',  row:'ta', t:'base'},
+  {h:'な',k:'ナ',r:'na',  row:'na', t:'base'},
+  {h:'に',k:'ニ',r:'ni',  row:'na', t:'base'},
+  {h:'ぬ',k:'ヌ',r:'nu',  row:'na', t:'base'},
+  {h:'ね',k:'ネ',r:'ne',  row:'na', t:'base'},
+  {h:'の',k:'ノ',r:'no',  row:'na', t:'base'},
+  {h:'は',k:'ハ',r:'ha',  row:'ha', t:'base'},
+  {h:'ひ',k:'ヒ',r:'hi',  row:'ha', t:'base'},
+  {h:'ふ',k:'フ',r:'fu',  row:'ha', t:'base', alt:['hu']},
+  {h:'へ',k:'ヘ',r:'he',  row:'ha', t:'base'},
+  {h:'ほ',k:'ホ',r:'ho',  row:'ha', t:'base'},
+  {h:'ま',k:'マ',r:'ma',  row:'ma', t:'base'},
+  {h:'み',k:'ミ',r:'mi',  row:'ma', t:'base'},
+  {h:'む',k:'ム',r:'mu',  row:'ma', t:'base'},
+  {h:'め',k:'メ',r:'me',  row:'ma', t:'base'},
+  {h:'も',k:'モ',r:'mo',  row:'ma', t:'base'},
+  {h:'や',k:'ヤ',r:'ya',  row:'ya', t:'base'},
+  {h:'ゆ',k:'ユ',r:'yu',  row:'ya', t:'base'},
+  {h:'よ',k:'ヨ',r:'yo',  row:'ya', t:'base'},
+  {h:'ら',k:'ラ',r:'ra',  row:'ra', t:'base'},
+  {h:'り',k:'リ',r:'ri',  row:'ra', t:'base'},
+  {h:'る',k:'ル',r:'ru',  row:'ra', t:'base'},
+  {h:'れ',k:'レ',r:'re',  row:'ra', t:'base'},
+  {h:'ろ',k:'ロ',r:'ro',  row:'ra', t:'base'},
+  {h:'わ',k:'ワ',r:'wa',  row:'wa', t:'base'},
+  {h:'を',k:'ヲ',r:'wo',  row:'wa', t:'base'},
+  {h:'ん',k:'ン',r:'n',   row:'n',  t:'base'},
+  {h:'が',k:'ガ',r:'ga',  row:'ga', t:'dakuten'},
+  {h:'ぎ',k:'ギ',r:'gi',  row:'ga', t:'dakuten'},
+  {h:'ぐ',k:'グ',r:'gu',  row:'ga', t:'dakuten'},
+  {h:'げ',k:'ゲ',r:'ge',  row:'ga', t:'dakuten'},
+  {h:'ご',k:'ゴ',r:'go',  row:'ga', t:'dakuten'},
+  {h:'ざ',k:'ザ',r:'za',  row:'za', t:'dakuten'},
+  {h:'じ',k:'ジ',r:'ji',  row:'za', t:'dakuten', alt:['zi']},
+  {h:'ず',k:'ズ',r:'zu',  row:'za', t:'dakuten'},
+  {h:'ぜ',k:'ゼ',r:'ze',  row:'za', t:'dakuten'},
+  {h:'ぞ',k:'ゾ',r:'zo',  row:'za', t:'dakuten'},
+  {h:'だ',k:'ダ',r:'da',  row:'da', t:'dakuten'},
+  {h:'ぢ',k:'ヂ',r:'ji',  row:'da', t:'dakuten'},
+  {h:'づ',k:'ヅ',r:'zu',  row:'da', t:'dakuten'},
+  {h:'で',k:'デ',r:'de',  row:'da', t:'dakuten'},
+  {h:'ど',k:'ド',r:'do',  row:'da', t:'dakuten'},
+  {h:'ば',k:'バ',r:'ba',  row:'ba', t:'dakuten'},
+  {h:'び',k:'ビ',r:'bi',  row:'ba', t:'dakuten'},
+  {h:'ぶ',k:'ブ',r:'bu',  row:'ba', t:'dakuten'},
+  {h:'べ',k:'ベ',r:'be',  row:'ba', t:'dakuten'},
+  {h:'ぼ',k:'ボ',r:'bo',  row:'ba', t:'dakuten'},
+  {h:'ぱ',k:'パ',r:'pa',  row:'pa', t:'handakuten'},
+  {h:'ぴ',k:'ピ',r:'pi',  row:'pa', t:'handakuten'},
+  {h:'ぷ',k:'プ',r:'pu',  row:'pa', t:'handakuten'},
+  {h:'ぺ',k:'ペ',r:'pe',  row:'pa', t:'handakuten'},
+  {h:'ぽ',k:'ポ',r:'po',  row:'pa', t:'handakuten'},
+];
+
+// Toutes les lignes disponibles avec leur label d'affichage et type
+const KANA_ROWS = [
+  {id:'a',  label:'あ', type:'base'},
+  {id:'ka', label:'か', type:'base'},
+  {id:'sa', label:'さ', type:'base'},
+  {id:'ta', label:'た', type:'base'},
+  {id:'na', label:'な', type:'base'},
+  {id:'ha', label:'は', type:'base'},
+  {id:'ma', label:'ま', type:'base'},
+  {id:'ya', label:'や', type:'base'},
+  {id:'ra', label:'ら', type:'base'},
+  {id:'wa', label:'わ', type:'base'},
+  {id:'n',  label:'ん', type:'base'},
+  {id:'ga', label:'が', type:'dakuten'},
+  {id:'za', label:'ざ', type:'dakuten'},
+  {id:'da', label:'だ', type:'dakuten'},
+  {id:'ba', label:'ば', type:'dakuten'},
+  {id:'pa', label:'ぱ', type:'handakuten'},
+];
+
+// Préréglages de sélection de lignes
+const PRESETS = {
+  'Voyelles': ['a'],
+  'Basique':  ['a','ka','sa','ta','na','ha','ma','ya','ra','wa','n'],
+  'Dakuten':  ['ga','za','da','ba'],
+  'Tout':     KANA_ROWS.map(r => r.id),
+};
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const state = {
+  // Navigation
+  mode: 'study',          // 'study' | 'quiz'
+  script: 'hiragana',
+  quizScript: 'hiragana',
+
+  // Paramètres du quiz
+  quizMode:      'type',  // 'type' | 'mc' | 'inverse' | 'learn'
+  questionCount: 20,      // 10 | 20 | 'all'
+  timerSecs:     false,   // false | 5 | 10 | 15 | 20
+  activeRows:    new Set(KANA_ROWS.map(r => r.id)),
+
+  // Panneau paramètres ouvert/fermé
+  settingsOpen: false,
+
+  // État du quiz en cours
+  quizPool:     [],
+  quizIndex:    0,
+  answered:     false,
+  lastCorrect:  null,
+  answerKana:   null,
+  userAnswer:   '',
+  score:        { correct: 0, total: 0 },
+  quizDone:     false,
+
+  // Timer
+  timerRemaining: 0,
+  timerInterval:  null,
+};
+
+// ══════════════════════════════════════
+// QUIZ LOGIC
+// ══════════════════════════════════════
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildPool() {
+  const filtered = kanaData.filter(k => state.activeRows.has(k.row));
+  const base     = filtered.length > 0 ? filtered : kanaData;
+  const shuffled = shuffleArray(base);
+  return state.questionCount === 'all' ? shuffled : shuffled.slice(0, state.questionCount);
+}
+
+function startQuiz() {
+  stopTimer();
+  state.quizPool    = buildPool();
+  state.quizIndex   = 0;
+  state.answered    = false;
+  state.lastCorrect = null;
+  state.answerKana  = null;
+  state.userAnswer  = '';
+  state.score       = { correct: 0, total: 0 };
+  state.quizDone    = false;
+}
+
+function startTimer() {
+  stopTimer();
+  if (!state.timerSecs || state.quizMode === 'learn') return;
+  state.timerRemaining = state.timerSecs;
+  state.timerInterval  = setInterval(() => {
+    state.timerRemaining--;
+    updateTimerDisplay();
+    if (state.timerRemaining <= 0) {
+      stopTimer();
+      if (!state.answered) autoFail();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  if (!el) return;
+  const frac = state.timerRemaining / state.timerSecs;
+  const color = frac > 0.5 ? 'var(--green)' : frac > 0.25 ? 'var(--gold)' : 'var(--red)';
+  el.textContent = state.timerRemaining;
+  el.style.color = color;
+  // Mise à jour anneau SVG
+  const circle = document.getElementById('timer-arc');
+  if (circle) {
+    const circ   = 2 * Math.PI * 20;
+    const offset = circ * (1 - frac);
+    circle.style.strokeDashoffset = offset;
+    circle.style.stroke = color;
+  }
+}
+
+function autoFail() {
+  if (state.answered) return;
+  state.score.total++;
+  state.lastCorrect = false;
+  state.answered    = true;
+  state.answerKana  = state.quizPool[state.quizIndex];
+  render();
+  scheduleAdvance();
+}
+
+function checkAnswer(ans) {
+  if (state.answered) return;
+  const kana = state.quizPool[state.quizIndex];
+  ans = (ans || state.userAnswer).toLowerCase().trim();
+  if (!ans) return;
+
+  stopTimer();
+
+  const canonical = kana.r.toLowerCase();
+  const alts      = (kana.alt || []).map(a => a.toLowerCase());
+  const correct   = ans === canonical || alts.includes(ans);
+
+  state.score.total++;
+  if (correct) state.score.correct++;
+  state.lastCorrect = correct;
+  state.answered    = true;
+  state.answerKana  = kana;
+  state.userAnswer  = '';
+
+  render();
+  scheduleAdvance();
+}
+
+function scheduleAdvance() {
+  setTimeout(() => {
+    if (state.quizIndex + 1 >= state.quizPool.length) {
+      state.quizDone = true;
+    } else {
+      state.quizIndex++;
+      state.answered    = false;
+      state.lastCorrect = null;
+      state.userAnswer  = '';
+    }
+    render();
+    if (!state.quizDone) {
+      startTimer();
+      const inp = document.getElementById('quiz-input');
+      if (inp) inp.focus();
+    }
+  }, 1400);
+}
+
+// ══════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════
+function render() {
+  document.getElementById('root').innerHTML = renderApp();
+  bindEvents();
+  if (state.mode === 'quiz' && !state.quizDone && !state.answered && state.timerSecs && !state.timerInterval) {
+    startTimer();
+  }
+  updateTimerDisplay();
+}
+
+function renderApp() {
+  return `
+    ${renderHeader()}
+    <main>
+      ${state.mode === 'study' ? renderStudy() : renderQuizWrapper()}
+    </main>
+    ${state.quizDone ? renderSummary() : ''}
+  `;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+function renderHeader() {
+  const scriptLabel = state.mode === 'quiz' ? state.quizScript : state.script;
+  const isHira      = scriptLabel === 'hiragana';
+
+  return `
+    <header>
+      <div class="logo">
+        <span class="logo-kana">仮名</span>
+        <span class="logo-text">Apprentissage</span>
+      </div>
+
+      <div class="mode-tabs">
+        <button class="mode-tab ${state.mode === 'study' ? 'active' : ''}" data-mode="study">Étude</button>
+        <button class="mode-tab ${state.mode === 'quiz'  ? 'active' : ''}" data-mode="quiz">Quiz</button>
+      </div>
+
+      <div class="script-toggle">
+        <span class="script-label ${isHira ? 'active' : ''}">Hiragana</span>
+        <button class="toggle-pill ${isHira ? '' : 'on'}" id="toggle-script"></button>
+        <span class="script-label ${!isHira ? 'active' : ''}">Katakana</span>
+      </div>
+    </header>
+  `;
+}
+
+// ── Study ─────────────────────────────────────────────────────────────────────
+function renderStudy() {
+  const sc     = state.script === 'hiragana' ? 'h' : 'k';
+  const symbol = state.script === 'hiragana' ? 'ひ' : 'カ';
+  const title  = state.script === 'hiragana' ? 'Hiragana' : 'Katakana';
+
+  const cards = kanaData.map(kana => `
+    <div class="kana-card" data-t="${kana.t}" title="${kana.r}">
+      <span class="card-char">${kana[sc]}</span>
+      <span class="card-rom">${kana.r}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="study-view">
+      <div class="section-head">
+        <span class="section-symbol">${symbol}</span>
+        <h2 class="section-name">${title}</h2>
+        <span class="section-badge">${kanaData.length} caractères</span>
+      </div>
+      <div class="kana-grid">${cards}</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot b"></div>Caractères de base</div>
+        <div class="legend-item"><div class="legend-dot d"></div>Dakuten ゛</div>
+        <div class="legend-item"><div class="legend-dot h"></div>Handakuten ゜</div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Quiz wrapper (paramètres + quiz) ──────────────────────────────────────────
+function renderQuizWrapper() {
+  return `
+    <div class="quiz-wrapper">
+      ${renderSettingsBar()}
+      ${renderQuiz()}
+    </div>
+  `;
+}
+
+// ── Barre de paramètres ───────────────────────────────────────────────────────
+function renderSettingsBar() {
+  const open = state.settingsOpen;
+
+  // Labels des paramètres actifs affichés dans le résumé fermé
+  const modeLabels   = { type: 'Saisie', mc: 'QCM', inverse: 'Inverse', learn: 'Apprentissage' };
+  const timerLabel   = state.timerSecs ? `${state.timerSecs}s` : 'Sans timer';
+  const countLabel   = state.questionCount === 'all' ? 'Tout' : `${state.questionCount} questions`;
+  const rowCount     = state.activeRows.size;
+
+  return `
+    <div class="settings-bar">
+
+      <!-- Résumé cliquable (toujours visible) -->
+      <button class="settings-toggle" id="settings-toggle">
+        <span class="settings-summary">
+          <span class="settings-pill">${modeLabels[state.quizMode]}</span>
+          <span class="settings-pill">${countLabel}</span>
+          <span class="settings-pill">${timerLabel}</span>
+          <span class="settings-pill">${rowCount} ligne${rowCount > 1 ? 's' : ''}</span>
+        </span>
+        <span class="settings-chevron ${open ? 'open' : ''}">▾</span>
+      </button>
+
+      <!-- Panneau dépliable -->
+      ${open ? renderSettingsPanel() : ''}
+
+    </div>
+  `;
+}
+
+function renderSettingsPanel() {
+  const modes  = [
+    {id:'type',    label:'Saisie',        hint:'Taper le rōmaji'},
+    {id:'mc',      label:'QCM',           hint:'4 choix'},
+    {id:'inverse', label:'Inverse',       hint:'Voir rōmaji → taper le kana'},
+    {id:'learn',   label:'Apprentissage', hint:'Révélation + auto-évaluation'},
+  ];
+  const counts  = [10, 20, 30, 'all'];
+  const timers  = [false, 5, 10, 15, 20];
+
+  // Chips mode
+  const modeChips = modes.map(m => `
+    <button class="chip ${state.quizMode === m.id ? 'active' : ''}"
+            data-param="mode" data-value="${m.id}"
+            title="${m.hint}">
+      ${m.label}
+    </button>
+  `).join('');
+
+  // Chips nombre de questions
+  const countChips = counts.map(n => {
+    const label = n === 'all' ? 'Tout' : `${n}`;
+    return `
+      <button class="chip ${state.questionCount === n ? 'active' : ''}"
+              data-param="count" data-value="${n}">
+        ${label}
+      </button>
+    `;
+  }).join('');
+
+  // Chips timer (masqué en mode apprentissage)
+  const timerChips = state.quizMode !== 'learn' ? timers.map(t => {
+    const label = t === false ? 'Non' : `${t}s`;
+    return `
+      <button class="chip ${state.timerSecs === t ? 'active' : ''}"
+              data-param="timer" data-value="${t}">
+        ${label}
+      </button>
+    `;
+  }).join('') : '<span class="settings-hint">Désactivée en mode Apprentissage</span>';
+
+  // Boutons préréglages
+  const presetBtns = Object.keys(PRESETS).map(k => `
+    <button class="chip chip--ghost" data-preset="${k}">${k}</button>
+  `).join('');
+
+  // Chips lignes
+  const rowChips = KANA_ROWS.map(row => {
+    const active = state.activeRows.has(row.id);
+    const cls    = row.type === 'dakuten' ? 'chip--dakuten'
+                 : row.type === 'handakuten' ? 'chip--handakuten' : '';
+    return `
+      <button class="chip chip--row ${active ? 'active' : ''} ${cls}"
+              data-row="${row.id}"
+              title="${row.id}">
+        ${row.label}
+      </button>
+    `;
+  }).join('');
+
+  return `
+    <div class="settings-panel">
+
+      <div class="settings-grid">
+
+        <!-- Mode -->
+        <div class="settings-section">
+          <div class="settings-label">Mode</div>
+          <div class="chip-group">${modeChips}</div>
+        </div>
+
+        <!-- Nombre de questions -->
+        <div class="settings-section">
+          <div class="settings-label">Questions</div>
+          <div class="chip-group">${countChips}</div>
+        </div>
+
+        <!-- Timer -->
+        <div class="settings-section">
+          <div class="settings-label">Minuterie</div>
+          <div class="chip-group">${timerChips}</div>
+        </div>
+
+        <!-- Lignes -->
+        <div class="settings-section settings-section--full">
+          <div class="settings-label">
+            Lignes
+            <span class="settings-label-count">(${state.activeRows.size}/${KANA_ROWS.length})</span>
+            <span class="settings-presets">${presetBtns}</span>
+          </div>
+          <div class="chip-group chip-group--rows">${rowChips}</div>
+        </div>
+
+      </div>
+
+      <button class="settings-apply" id="settings-apply">
+        ✓ Appliquer et relancer
+      </button>
+
+    </div>
+  `;
+}
+
+// ── Quiz principal ────────────────────────────────────────────────────────────
+function renderQuiz() {
+  if (!state.quizPool.length) startQuiz();
+
+  const kana      = state.quizPool[state.quizIndex];
+  const sc        = state.quizScript === 'hiragana' ? 'h' : 'k';
+  // En mode inverse on affiche le rōmaji, sinon le caractère
+  const display   = state.quizMode === 'inverse' ? kana.r : kana[sc];
+  const { correct, total } = state.score;
+  const pct       = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const progressW = Math.round((state.quizIndex / state.quizPool.length) * 100);
+  const inputCls  = state.answered ? (state.lastCorrect ? 'correct' : 'incorrect') : '';
+
+  // Timer ring SVG
+  const CIRC    = 2 * Math.PI * 20;
+  const frac    = state.timerSecs ? state.timerRemaining / state.timerSecs : 1;
+  const offset  = CIRC * (1 - frac);
+  const tColor  = frac > 0.5 ? 'var(--green)' : frac > 0.25 ? 'var(--gold)' : 'var(--red)';
+  const timerHtml = (state.timerSecs && state.quizMode !== 'learn') ? `
+    <div class="timer-ring">
+      <svg width="48" height="48" viewBox="0 0 48 48" style="transform:rotate(-90deg)">
+        <circle cx="24" cy="24" r="20" fill="none" stroke="var(--border)" stroke-width="3"
+                stroke-dasharray="${CIRC}" stroke-dashoffset="0"/>
+        <circle id="timer-arc" cx="24" cy="24" r="20" fill="none" stroke="${tColor}" stroke-width="3"
+                stroke-linecap="round"
+                stroke-dasharray="${CIRC}" stroke-dashoffset="${offset}"
+                style="transition:stroke-dashoffset 0.9s linear,stroke 0.4s"/>
+      </svg>
+      <span id="timer-display" class="timer-num" style="color:${tColor}">
+        ${state.timerRemaining || state.timerSecs}
+      </span>
+    </div>
+  ` : '';
+
+  // Feedback
+  const feedbackHtml = state.answered ? `
+    <div class="feedback ${state.lastCorrect ? 'correct-fb' : 'incorrect-fb'}">
+      <span class="feedback-icon">${state.lastCorrect ? '✓' : '✗'}</span>
+      <span>
+        ${state.lastCorrect
+          ? 'Correct !'
+          : `Incorrect — réponse : <span class="feedback-answer">${state.answerKana.r}</span>`
+        }
+      </span>
+    </div>
+  ` : '';
+
+  // Zone de réponse selon le mode
+  let answerHtml = '';
+  if (state.quizMode === 'type' || state.quizMode === 'inverse') {
+    const placeholder = state.quizMode === 'inverse' ? 'Caractère…' : 'Rōmaji…';
+    answerHtml = `
+      <form id="quiz-form">
+        <div class="quiz-form">
+          <input id="quiz-input" class="quiz-input ${inputCls}"
+            type="text" value="${state.userAnswer}"
+            placeholder="${placeholder}"
+            autocomplete="off" autocorrect="off" spellcheck="false"
+            ${state.answered ? 'disabled' : ''}/>
+          <button type="submit" class="quiz-submit" ${state.answered ? 'disabled' : ''}>
+            Valider
+          </button>
+        </div>
+      </form>
+    `;
+  } else if (state.quizMode === 'mc') {
+    answerHtml = renderMcChoices(kana);
+  } else if (state.quizMode === 'learn') {
+    answerHtml = renderLearn(kana);
+  }
+
+  return `
+    <div class="quiz-view">
+
+      <!-- Score + progression -->
+      <div class="score-bar">
+        <div>
+          <div class="score-numbers">${correct}<span> / ${total}</span></div>
+          ${total > 0 ? `<div class="score-pct">${pct}% correct</div>` : ''}
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${progressW}%"></div>
+        </div>
+        ${timerHtml}
+        <button class="reset-btn" id="reset-quiz">↺</button>
+      </div>
+
+      <!-- Caractère affiché -->
+      <div class="quiz-card">
+        <div class="quiz-char ${state.answered ? '' : 'entering'}">${display}</div>
+        <div class="quiz-hint">
+          ${state.quizIndex + 1} / ${state.quizPool.length}
+          ${state.quizMode === 'inverse' ? ' · tapez le caractère' : ' · romanisation'}
+        </div>
+      </div>
+
+      <!-- Zone de réponse -->
+      ${answerHtml}
+      ${feedbackHtml}
+
+    </div>
+  `;
+}
+
+function renderMcChoices(kana) {
+  if (!state.mcChoices || state.mcChoices[0]?.h !== kana.h) {
+    const distractors = shuffleArray(
+      kanaData.filter(k => k.r !== kana.r)
+    ).slice(0, 3);
+    state.mcChoices = shuffleArray([kana, ...distractors]);
+  }
+
+  const buttons = state.mcChoices.map(ch => {
+    let cls = 'mc-btn';
+    if (state.answered) {
+      if (ch.r === kana.r) cls += ' mc-btn--correct';
+      else if (state.lastMcChoice === ch.r) cls += ' mc-btn--incorrect';
+    }
+    return `
+      <button class="${cls}" data-mc="${ch.r}" ${state.answered ? 'disabled' : ''}>
+        <span class="mc-char">${state.quizScript === 'hiragana' ? ch.h : ch.k}</span>
+        <span class="mc-rom">${ch.r}</span>
+      </button>
+    `;
+  }).join('');
+
+  return `<div class="mc-grid">${buttons}</div>`;
+}
+
+function renderLearn(kana) {
+  if (state.answered) return '';
+  const sc = state.quizScript === 'hiragana' ? 'h' : 'k';
+  if (state.learnRevealed) {
+    return `
+      <div class="learn-reveal">
+        ${kana[sc]} <span class="learn-reveal-rom">(${kana.r})</span>
+      </div>
+      <div class="quiz-form">
+        <button class="quiz-submit quiz-submit--correct" data-learn="ok">✓ Je savais</button>
+        <button class="quiz-submit quiz-submit--incorrect" data-learn="fail">✗ Raté</button>
+      </div>
+    `;
+  }
+  return `
+    <button class="quiz-submit" style="width:100%" id="learn-reveal-btn">
+      Montrer la réponse
+    </button>
+  `;
+}
+
+function renderSummary() {
+  const { correct, total } = state.score;
+  const pct        = Math.round((correct / total) * 100);
+  const gradeEmoji = pct >= 90 ? '優' : pct >= 70 ? '良' : pct >= 50 ? '可' : '不';
+  const grade      = pct >= 90 ? 'Excellent !' : pct >= 70 ? 'Bien joué.' : pct >= 50 ? 'Continuez !' : 'À réviser…';
+
+  return `
+    <div class="summary-overlay">
+      <div class="summary-box">
+        <div class="summary-kana">${gradeEmoji}</div>
+        <div class="summary-title">Session terminée</div>
+        <div class="summary-score">${pct}%</div>
+        <div class="summary-sub">${correct} bonnes réponses sur ${total} questions</div>
+        <div class="summary-grade">${grade}</div>
+        <button class="summary-btn" id="restart-btn">Recommencer</button>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════
+// EVENTS
+// ══════════════════════════════════════
+function bindEvents() {
+
+  // Onglets mode
+  document.querySelectorAll('.mode-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.mode = btn.dataset.mode;
+      if (state.mode === 'quiz') { startQuiz(); }
+      render();
+    });
+  });
+
+  // Toggle script
+  const toggleBtn = document.getElementById('toggle-script');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      if (state.mode === 'study') {
+        state.script = state.script === 'hiragana' ? 'katakana' : 'hiragana';
+      } else {
+        state.quizScript = state.quizScript === 'hiragana' ? 'katakana' : 'hiragana';
+        startQuiz();
+      }
+      render();
+    });
+  }
+
+  // Toggle panneau paramètres
+  const settingsToggle = document.getElementById('settings-toggle');
+  if (settingsToggle) {
+    settingsToggle.addEventListener('click', () => {
+      state.settingsOpen = !state.settingsOpen;
+      render();
+    });
+  }
+
+  // Chips paramètres (mode, count, timer)
+  document.querySelectorAll('[data-param]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const { param, value } = btn.dataset;
+      if (param === 'mode')  {
+        state.quizMode = value;
+        if (value === 'learn') state.timerSecs = false;
+      }
+      if (param === 'count') state.questionCount = value === 'all' ? 'all' : parseInt(value);
+      if (param === 'timer') state.timerSecs = value === 'false' ? false : parseInt(value);
+      // Re-render juste le panneau sans relancer le quiz
+      const panel = document.querySelector('.settings-panel');
+      if (panel) panel.outerHTML = renderSettingsPanel();
+      // Re-render complet pour mettre à jour le résumé
+      render();
+    });
+  });
+
+  // Préréglages de lignes
+  document.querySelectorAll('[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.activeRows = new Set(PRESETS[btn.dataset.preset]);
+      render();
+    });
+  });
+
+  // Toggle lignes individuelles
+  document.querySelectorAll('[data-row]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.row;
+      if (state.activeRows.has(id) && state.activeRows.size > 1) {
+        state.activeRows.delete(id);
+      } else {
+        state.activeRows.add(id);
+      }
+      render();
+    });
+  });
+
+  // Bouton Appliquer
+  const applyBtn = document.getElementById('settings-apply');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      state.settingsOpen  = false;
+      state.mcChoices     = null;
+      state.learnRevealed = false;
+      startQuiz();
+      render();
+    });
+  }
+
+  // Formulaire quiz (mode saisie / inverse)
+  const form = document.getElementById('quiz-form');
+  if (form) {
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      if (!state.answered) checkAnswer();
+    });
+  }
+
+  const inp = document.getElementById('quiz-input');
+  if (inp) {
+    inp.addEventListener('input', e => { state.userAnswer = e.target.value; });
+    if (!state.answered) inp.focus();
+  }
+
+  // QCM
+  document.querySelectorAll('[data-mc]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (state.answered) return;
+      state.lastMcChoice = btn.dataset.mc;
+      checkAnswer(btn.dataset.mc);
+    });
+  });
+
+  // Mode apprentissage — révéler
+  const revealBtn = document.getElementById('learn-reveal-btn');
+  if (revealBtn) {
+    revealBtn.addEventListener('click', () => {
+      state.learnRevealed = true;
+      render();
+    });
+  }
+
+  // Mode apprentissage — évaluation
+  document.querySelectorAll('[data-learn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ok = btn.dataset.learn === 'ok';
+      state.learnRevealed = false;
+      checkAnswer(ok ? state.quizPool[state.quizIndex].r : '');
+    });
+  });
+
+  // Reset quiz
+  const resetBtn = document.getElementById('reset-quiz');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      state.mcChoices     = null;
+      state.learnRevealed = false;
+      startQuiz();
+      render();
+    });
+  }
+
+  // Recommencer depuis summary
+  const restartBtn = document.getElementById('restart-btn');
+  if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+      state.mcChoices     = null;
+      state.learnRevealed = false;
+      startQuiz();
+      render();
+    });
+  }
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+render();
+</script>
+</body>
+</html>
